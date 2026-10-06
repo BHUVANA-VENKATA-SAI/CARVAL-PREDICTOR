@@ -7,21 +7,16 @@ form.addEventListener("submit", async function (event) {
     const resultBox = document.getElementById("result");
     const priceElement = document.getElementById("price");
 
-    // Get values from form
-    const brand = document.getElementById("brand").value;
-    const model = document.getElementById("model").value;
+    const brand = document.getElementById("brand").value.trim();
+    const model = document.getElementById("model").value.trim();
     const year = Number(document.getElementById("year").value);
-    const kmDriven = Number(
-        document.getElementById("km_driven").value
-    );
+    const kmDriven = Number(document.getElementById("km_driven").value);
 
     const fuel = document.getElementById("fuel").value;
     const sellerType = document.getElementById("seller_type").value;
     const transmission = document.getElementById("transmission").value;
     const owner = document.getElementById("owner").value;
 
-
-    // Check inputs
     if (
         !brand ||
         !model ||
@@ -32,44 +27,28 @@ form.addEventListener("submit", async function (event) {
         !transmission ||
         !owner
     ) {
-
         alert("Please fill all the car details.");
-
         return;
     }
 
-
-    // Show loading
+    resultBox.style.display = "block";
     priceElement.innerText = "Predicting...";
 
-    resultBox.style.display = "block";
-
-
-    // Data for FastAPI
     const carData = {
-
         Brand: brand,
-
         Model: model,
-
         Year: year,
-
         KM_Driven: kmDriven,
-
         Fuel: fuel,
-
         Seller_Type: sellerType,
-
         Transmission: transmission,
-
         Owner: owner
     };
-
 
     try {
 
         const response = await fetch(
-            "http://127.0.0.1:8000/predict",
+            "https://carval-predictor.onrender.com/predict",
             {
                 method: "POST",
 
@@ -81,44 +60,29 @@ form.addEventListener("submit", async function (event) {
             }
         );
 
-
         if (!response.ok) {
-
-            throw new Error(
-                "Prediction request failed."
-            );
+            throw new Error("Prediction request failed.");
         }
-
 
         const data = await response.json();
 
+        const formattedPrice = new Intl.NumberFormat("en-IN", {
+            style: "currency",
+            currency: "INR",
+            maximumFractionDigits: 0
+        }).format(data.predicted_price);
 
-        // Format price
-        const formattedPrice =
-            new Intl.NumberFormat("en-IN", {
-                style: "currency",
-                currency: "INR",
-                maximumFractionDigits: 0
-            }).format(data.predicted_price);
-
-
-        // Display result
-        priceElement.innerText =
-            formattedPrice;
-
+        priceElement.innerText = formattedPrice;
 
     } catch (error) {
 
         console.error(error);
 
-        priceElement.innerText =
-            "Prediction Failed";
+        priceElement.innerText = "Prediction Failed";
 
         alert(
-            "Unable to connect to the ML backend. " +
-            "Make sure FastAPI is running."
+            "Unable to connect to the prediction server. Please try again."
         );
-
     }
 
 });
