@@ -3,7 +3,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import pandas as pd
 import joblib
-from datetime import datetime
 
 
 # ==========================================
@@ -31,11 +30,15 @@ app.add_middleware(
 
 
 # ==========================================
-# LOAD ML MODEL
+# LOAD NEW FINAL ML MODEL
 # ==========================================
 
 model = joblib.load(
-    "../Model/used_car_price_model.pkl"
+    "../Model/final_model.pkl"
+)
+
+feature_columns = joblib.load(
+    "../Model/feature_columns.pkl"
 )
 
 
@@ -74,18 +77,10 @@ def home():
 @app.post("/predict")
 def predict_price(car: CarDetails):
 
-    # Current year
-    current_year = datetime.now().year
+    # ==========================================
+    # CREATE INPUT DATAFRAME
+    # ==========================================
 
-    # Feature engineering
-    car_age = current_year - car.Year
-
-    if car_age <= 0:
-        car_age = 1
-
-    km_per_year = car.KM_Driven / car_age
-
-    # Create DataFrame
     input_data = pd.DataFrame({
 
         "Brand": [car.Brand],
@@ -102,25 +97,58 @@ def predict_price(car: CarDetails):
 
         "Transmission": [car.Transmission],
 
-        "Owner": [car.Owner],
-
-        "Car_Age": [car_age],
-
-        "KM_per_Year": [km_per_year]
+        "Owner": [car.Owner]
     })
 
 
-    # Predict
-    prediction = model.predict(input_data)[0]
+    # ==========================================
+    # ONE-HOT ENCODING
+    # ==========================================
 
+    categorical_features = [
+        "Brand",
+        "Model",
+        "Fuel",
+        "Seller_Type",
+        "Transmission",
+        "Owner"
+    ]
+
+    input_encoded = pd.get_dummies(
+        input_data,
+        columns=categorical_features,
+        drop_first=True
+    )
+
+
+    # ==========================================
+    # MATCH TRAINING FEATURES
+    # ==========================================
+
+    input_encoded = input_encoded.reindex(
+        columns=feature_columns,
+        fill_value=0
+    )
+
+
+    # Convert True/False to 0/1 if required
+    input_encoded = input_encoded.astype(int)
+
+
+    # ==========================================
+    # PREDICT PRICE
+    # ==========================================
+
+    prediction = model.predict(input_encoded)[0]
+
+
+    # ==========================================
+    # RETURN RESULT
+    # ==========================================
 
     return {
 
         "predicted_price": round(float(prediction), 2),
 
-        "currency": "INR",
-
-        "car_age": car_age,
-
-        "km_per_year": round(km_per_year, 2)
+        "currency": "INR"
     }
