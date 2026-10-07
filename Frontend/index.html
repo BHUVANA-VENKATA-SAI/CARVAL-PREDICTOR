@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 
@@ -38,8 +39,8 @@
             </p>
 
             <h1>
-                Used Car Price
-                <span>Prediction</span>
+                Used Car
+                <span>Price Prediction</span>
             </h1>
 
             <p class="hero-text">
@@ -83,19 +84,20 @@
                 <div class="form-grid">
 
 
-                    <!-- BRAND -->
+                    <!-- COMPANY / BRAND -->
                     <div class="form-group">
 
                         <label for="brand">
-                            Brand
+                            Company / Brand
                         </label>
 
-                        <input
-                            type="text"
-                            id="brand"
-                            placeholder="e.g. Toyota"
-                            required
-                        >
+                        <select id="brand" required>
+
+                            <option value="">
+                                Select Company
+                            </option>
+
+                        </select>
 
                     </div>
 
@@ -107,12 +109,13 @@
                             Model
                         </label>
 
-                        <input
-                            type="text"
-                            id="model"
-                            placeholder="e.g. Corolla"
-                            required
-                        >
+                        <select id="model" required disabled>
+
+                            <option value="">
+                                Select Model
+                            </option>
+
+                        </select>
 
                     </div>
 
@@ -213,6 +216,10 @@
                                 Dealer
                             </option>
 
+                            <option value="Trustmark Dealer">
+                                Trustmark Dealer
+                            </option>
+
                         </select>
 
                     </div>
@@ -243,43 +250,6 @@
 
                     </div>
 
-
-                    <!-- OWNER -->
-                    <div class="form-group">
-
-                        <label for="owner">
-                            Owner
-                        </label>
-
-                        <select id="owner" required>
-
-                            <option value="">
-                                Select Owner
-                            </option>
-
-                            <option value="First Owner">
-                                First Owner
-                            </option>
-
-                            <option value="Second Owner">
-                                Second Owner
-                            </option>
-
-                            <option value="Third Owner">
-                                Third Owner
-                            </option>
-
-                            <option value="Fourth & Above Owner">
-                                Fourth & Above Owner
-                            </option>
-
-                            <option value="Test Drive Car">
-                                Test Drive Car
-                            </option>
-
-                        </select>
-
-                    </div>
 
                 </div>
 
@@ -337,8 +307,8 @@
             designed to estimate the resale price of used cars.
             The system analyzes vehicle details such as brand, model,
             manufacturing year, kilometers driven, fuel type,
-            seller type, transmission and ownership to generate
-            an estimated selling price.
+            seller type and transmission to generate an
+            estimated selling price.
         </p>
 
     </section>
@@ -360,3 +330,4 @@
 </body>
 
 </html>
+```
