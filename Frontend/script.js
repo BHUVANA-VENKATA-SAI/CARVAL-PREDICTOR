@@ -1,4 +1,3 @@
-```javascript
 // ==========================================
 // CARVAL-PREDICTOR
 // Used Car Price Prediction
@@ -21,21 +20,29 @@ const priceElement = document.getElementById("price");
 
 
 // ==========================================
-// DATA
+// CAR DATA
 // ==========================================
 
 let carData = [];
 
 
 // ==========================================
-// LOAD CSV DATA
+// LOAD CAR DATA FROM CSV
 // ==========================================
 
 async function loadCarData() {
 
     try {
 
-        const response = await fetch("Car Price.csv");
+        console.log("Loading car dataset...");
+
+
+        // IMPORTANT:
+        // Dataset is outside Frontend folder
+        const response = await fetch(
+            "../Dataset/Car Price.csv"
+        );
+
 
         if (!response.ok) {
 
@@ -49,7 +56,15 @@ async function loadCarData() {
         const csvText = await response.text();
 
 
-        // Split CSV into lines
+        console.log(
+            "CSV loaded successfully."
+        );
+
+
+        // ==========================================
+        // SPLIT CSV INTO LINES
+        // ==========================================
+
         const lines = csvText
             .trim()
             .split(/\r?\n/);
@@ -58,15 +73,16 @@ async function loadCarData() {
         if (lines.length < 2) {
 
             throw new Error(
-                "CSV file is empty"
+                "CSV file is empty."
             );
 
         }
 
 
-        // ------------------------------------------
-        // Parse CSV properly
-        // ------------------------------------------
+        // ==========================================
+        // CSV LINE PARSER
+        // Handles commas inside quotes
+        // ==========================================
 
         function parseCSVLine(line) {
 
@@ -77,13 +93,22 @@ async function loadCarData() {
             let insideQuotes = false;
 
 
-            for (let i = 0; i < line.length; i++) {
+            for (
+                let i = 0;
+                i < line.length;
+                i++
+            ) {
 
                 const character = line[i];
 
 
+                // ----------------------------------
+                // QUOTES
+                // ----------------------------------
+
                 if (character === '"') {
 
+                    // Handle double quotes
                     if (
                         insideQuotes &&
                         line[i + 1] === '"'
@@ -93,7 +118,9 @@ async function loadCarData() {
 
                         i++;
 
-                    } else {
+                    }
+
+                    else {
 
                         insideQuotes =
                             !insideQuotes;
@@ -101,6 +128,11 @@ async function loadCarData() {
                     }
 
                 }
+
+
+                // ----------------------------------
+                // COMMA
+                // ----------------------------------
 
                 else if (
                     character === "," &&
@@ -115,6 +147,11 @@ async function loadCarData() {
 
                 }
 
+
+                // ----------------------------------
+                // NORMAL CHARACTER
+                // ----------------------------------
+
                 else {
 
                     current += character;
@@ -124,6 +161,7 @@ async function loadCarData() {
             }
 
 
+            // Add last value
             result.push(
                 current.trim()
             );
@@ -134,18 +172,33 @@ async function loadCarData() {
         }
 
 
-        // Get headers
+        // ==========================================
+        // GET CSV HEADERS
+        // ==========================================
+
         const headers =
             parseCSVLine(lines[0]);
 
 
+        console.log(
+            "CSV Headers:",
+            headers
+        );
+
+
+        // Find Brand column
         const brandIndex =
             headers.indexOf("Brand");
 
 
+        // Find Model column
         const modelIndex =
             headers.indexOf("Model");
 
+
+        // ==========================================
+        // CHECK REQUIRED COLUMNS
+        // ==========================================
 
         if (
             brandIndex === -1 ||
@@ -153,15 +206,27 @@ async function loadCarData() {
         ) {
 
             throw new Error(
-                "Brand or Model column not found in CSV"
+                "Brand or Model column was not found in CSV."
             );
 
         }
 
 
-        // ------------------------------------------
-        // Read rows
-        // ------------------------------------------
+        console.log(
+            "Brand column index:",
+            brandIndex
+        );
+
+
+        console.log(
+            "Model column index:",
+            modelIndex
+        );
+
+
+        // ==========================================
+        // READ ALL CAR ROWS
+        // ==========================================
 
         for (
             let i = 1;
@@ -169,8 +234,11 @@ async function loadCarData() {
             i++
         ) {
 
+            // Skip empty lines
             if (!lines[i].trim()) {
+
                 continue;
+
             }
 
 
@@ -186,6 +254,7 @@ async function loadCarData() {
                 row[modelIndex];
 
 
+            // Only add valid records
             if (
                 brand &&
                 model
@@ -193,9 +262,11 @@ async function loadCarData() {
 
                 carData.push({
 
-                    brand: brand,
+                    brand:
+                        brand.trim(),
 
-                    model: model
+                    model:
+                        model.trim()
 
                 });
 
@@ -204,80 +275,108 @@ async function loadCarData() {
         }
 
 
-        // ------------------------------------------
-        // Remove duplicates
-        // ------------------------------------------
+        console.log(
+            "Total car records:",
+            carData.length
+        );
+
+
+        // ==========================================
+        // REMOVE DUPLICATE BRAND + MODEL
+        // ==========================================
 
         const uniqueCars = [];
 
         const seen = new Set();
 
 
-        carData.forEach(car => {
+        carData.forEach(
+            function (car) {
 
-            const key =
-                `${car.brand}|||${car.model}`;
+                const key =
+                    car.brand +
+                    "|||" +
+                    car.model;
 
 
-            if (!seen.has(key)) {
+                if (!seen.has(key)) {
 
-                seen.add(key);
+                    seen.add(key);
 
-                uniqueCars.push(car);
+                    uniqueCars.push(car);
+
+                }
 
             }
-
-        });
-
-
-        carData = uniqueCars;
+        );
 
 
-        // ------------------------------------------
-        // Create Company / Brand list
-        // ------------------------------------------
+        carData =
+            uniqueCars;
+
+
+        console.log(
+            "Unique car combinations:",
+            carData.length
+        );
+
+
+        // ==========================================
+        // GET UNIQUE COMPANIES
+        // ==========================================
 
         const brands = [
             ...new Set(
                 carData.map(
-                    car => car.brand
+                    function (car) {
+                        return car.brand;
+                    }
                 )
             )
-        ].sort();
+        ];
 
 
-        brands.forEach(brand => {
-
-            const option =
-                document.createElement("option");
-
-
-            option.value = brand;
-
-            option.textContent = brand;
-
-
-            brandSelect.appendChild(
-                option
-            );
-
-        });
+        // Sort alphabetically
+        brands.sort();
 
 
         console.log(
-            "Car dataset loaded successfully."
+            "Companies found:",
+            brands
+        );
+
+
+        // ==========================================
+        // ADD COMPANIES TO DROPDOWN
+        // ==========================================
+
+        brands.forEach(
+            function (brand) {
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+
+                option.value =
+                    brand;
+
+
+                option.textContent =
+                    brand;
+
+
+                brandSelect.appendChild(
+                    option
+                );
+
+            }
         );
 
 
         console.log(
-            "Companies:",
-            brands.length
-        );
-
-
-        console.log(
-            "Brand + Model combinations:",
-            carData.length
+            "Company dropdown populated."
         );
 
     }
@@ -286,14 +385,15 @@ async function loadCarData() {
     catch (error) {
 
         console.error(
-            "CSV loading error:",
+            "CSV Loading Error:",
             error
         );
 
 
         alert(
-            "Unable to load Car Price.csv. " +
-            "Make sure it is inside the same folder as index.html."
+            "Unable to load car dataset.\n\n" +
+            "Make sure you are running Frontend/index.html " +
+            "using Live Server."
         );
 
     }
@@ -311,66 +411,121 @@ brandSelect.addEventListener(
 
 
         const selectedBrand =
-            this.value;
+            brandSelect.value;
 
 
-        // Reset model dropdown
+        console.log(
+            "Selected Company:",
+            selectedBrand
+        );
+
+
+        // ==========================================
+        // RESET MODEL DROPDOWN
+        // ==========================================
+
         modelSelect.innerHTML =
             '<option value="">Select Model</option>';
 
 
-        // Disable model if no company
+        // ==========================================
+        // NO COMPANY SELECTED
+        // ==========================================
+
         if (!selectedBrand) {
 
-            modelSelect.disabled = true;
+            modelSelect.disabled =
+                true;
 
             return;
 
         }
 
 
-        // Find models belonging to selected brand
+        // ==========================================
+        // FIND MODELS FOR SELECTED COMPANY
+        // ==========================================
+
         const models = [
+
             ...new Set(
 
                 carData
 
                     .filter(
-                        car =>
-                            car.brand ===
-                            selectedBrand
+                        function (car) {
+
+                            return (
+                                car.brand ===
+                                selectedBrand
+                            );
+
+                        }
                     )
 
                     .map(
-                        car =>
-                            car.model
+                        function (car) {
+
+                            return car.model;
+
+                        }
                     )
 
             )
-        ].sort();
+
+        ];
 
 
-        // Add models
-        models.forEach(model => {
-
-            const option =
-                document.createElement("option");
+        // Sort models
+        models.sort();
 
 
-            option.value = model;
-
-            option.textContent = model;
-
-
-            modelSelect.appendChild(
-                option
-            );
-
-        });
+        console.log(
+            "Models found:",
+            models
+        );
 
 
-        // Enable model dropdown
-        modelSelect.disabled = false;
+        // ==========================================
+        // ADD MODELS TO DROPDOWN
+        // ==========================================
+
+        models.forEach(
+            function (model) {
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+
+                option.value =
+                    model;
+
+
+                option.textContent =
+                    model;
+
+
+                modelSelect.appendChild(
+                    option
+                );
+
+            }
+        );
+
+
+        // ==========================================
+        // ENABLE MODEL DROPDOWN
+        // ==========================================
+
+        modelSelect.disabled =
+            false;
+
+
+        console.log(
+            "Model dropdown populated."
+        );
 
     }
 );
@@ -384,7 +539,7 @@ loadCarData();
 
 
 // ==========================================
-// FORM SUBMISSION
+// PREDICTION FORM
 // ==========================================
 
 form.addEventListener(
@@ -392,13 +547,13 @@ form.addEventListener(
     async function (event) {
 
 
-        // Prevent page refresh
+        // Stop page refresh
         event.preventDefault();
 
 
-        // ------------------------------------------
-        // Get values
-        // ------------------------------------------
+        // ==========================================
+        // GET FORM VALUES
+        // ==========================================
 
         const brand =
             document
@@ -446,9 +601,9 @@ form.addEventListener(
                 .value;
 
 
-        // ------------------------------------------
-        // Validate
-        // ------------------------------------------
+        // ==========================================
+        // VALIDATION
+        // ==========================================
 
         if (
             !brand ||
@@ -469,9 +624,9 @@ form.addEventListener(
         }
 
 
-        // ------------------------------------------
-        // Show result box
-        // ------------------------------------------
+        // ==========================================
+        // SHOW RESULT BOX
+        // ==========================================
 
         resultBox.style.display =
             "block";
@@ -481,48 +636,61 @@ form.addEventListener(
             "Predicting...";
 
 
-        // ------------------------------------------
-        // Prepare data
-        // ------------------------------------------
+        // ==========================================
+        // PREPARE DATA FOR FASTAPI
+        // ==========================================
 
         const carDataToSend = {
 
-            Brand: brand,
+            Brand:
+                brand,
 
-            Model: model,
+            Model:
+                model,
 
-            Year: year,
+            Year:
+                year,
 
-            KM_Driven: kmDriven,
+            KM_Driven:
+                kmDriven,
 
-            Fuel: fuel,
+            Fuel:
+                fuel,
 
-            Seller_Type: sellerType,
+            Seller_Type:
+                sellerType,
 
-            Transmission: transmission,
+            Transmission:
+                transmission,
 
 
-            // IMPORTANT:
-            // The existing trained ML model
-            // expects Owner.
+            // --------------------------------------
+            // IMPORTANT
+            // --------------------------------------
+            // Your CURRENT trained model/backend
+            // still expects Owner.
             //
-            // Owner is hidden from frontend.
-            // We use First Owner internally.
+            // Owner is NOT displayed in frontend.
+            //
+            // We are sending First Owner internally
+            // only to keep your existing model working.
+            // --------------------------------------
 
-            Owner: "First Owner"
+            Owner:
+                "First Owner"
 
         };
 
 
         console.log(
-            "Sending prediction data:",
+            "Data sent to API:",
             carDataToSend
         );
 
 
-        // ------------------------------------------
-        // SEND TO FASTAPI
-        // ------------------------------------------
+        // ==========================================
+        // SEND REQUEST TO FASTAPI
+        // ==========================================
 
         try {
 
@@ -531,7 +699,9 @@ form.addEventListener(
                     "https://carval-predictor.onrender.com/predict",
                     {
 
-                        method: "POST",
+                        method:
+                            "POST",
+
 
                         headers: {
 
@@ -539,6 +709,7 @@ form.addEventListener(
                                 "application/json"
 
                         },
+
 
                         body:
                             JSON.stringify(
@@ -549,9 +720,9 @@ form.addEventListener(
                 );
 
 
-            // --------------------------------------
-            // Check response
-            // --------------------------------------
+            // ==========================================
+            // CHECK RESPONSE
+            // ==========================================
 
             if (!response.ok) {
 
@@ -560,7 +731,7 @@ form.addEventListener(
 
 
                 console.error(
-                    "Server error:",
+                    "API Error:",
                     errorText
                 );
 
@@ -572,9 +743,9 @@ form.addEventListener(
             }
 
 
-            // --------------------------------------
-            // Get prediction
-            // --------------------------------------
+            // ==========================================
+            // GET RESPONSE
+            // ==========================================
 
             const data =
                 await response.json();
@@ -586,20 +757,23 @@ form.addEventListener(
             );
 
 
-            // --------------------------------------
-            // Format Indian currency
-            // --------------------------------------
+            // ==========================================
+            // FORMAT PRICE
+            // ==========================================
 
             const formattedPrice =
                 new Intl.NumberFormat(
                     "en-IN",
                     {
 
-                        style: "currency",
+                        style:
+                            "currency",
 
-                        currency: "INR",
+                        currency:
+                            "INR",
 
-                        maximumFractionDigits: 0
+                        maximumFractionDigits:
+                            0
 
                     }
                 ).format(
@@ -607,9 +781,9 @@ form.addEventListener(
                 );
 
 
-            // --------------------------------------
-            // Display price
-            // --------------------------------------
+            // ==========================================
+            // DISPLAY PRICE
+            // ==========================================
 
             priceElement.innerText =
                 formattedPrice;
@@ -620,7 +794,7 @@ form.addEventListener(
         catch (error) {
 
             console.error(
-                "Prediction error:",
+                "Prediction Error:",
                 error
             );
 
@@ -630,7 +804,7 @@ form.addEventListener(
 
 
             alert(
-                "Unable to connect to the prediction server. " +
+                "Unable to connect to the prediction server.\n\n" +
                 "Please try again."
             );
 
@@ -638,4 +812,3 @@ form.addEventListener(
 
     }
 );
-```

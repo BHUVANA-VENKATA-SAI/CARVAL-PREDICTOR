@@ -1,131 +1,250 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>CARVAL-PREDICTOR | Used Car Price Prediction</title>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    <link rel="stylesheet" href="style.css">
+    <title>
+        CARVAL-PREDICTOR | Used Car Price Prediction
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+
 </head>
+
 
 <body>
 
-    <!-- NAVBAR -->
+
+    <!-- ==========================================
+         NAVBAR
+    =========================================== -->
+
     <nav class="navbar">
 
         <div class="logo">
-            🚗 <span>CARVAL-PREDICTOR</span>
+
+            🚗
+            <span>
+                CARVAL-PREDICTOR
+            </span>
+
         </div>
 
+
         <div class="nav-links">
-            <a href="#home">Home</a>
-            <a href="#predict">Predict</a>
-            <a href="#about">About</a>
+
+            <a href="#home">
+                Home
+            </a>
+
+            <a href="#predict">
+                Predict
+            </a>
+
+            <a href="#about">
+                About
+            </a>
+
         </div>
 
     </nav>
 
 
-    <!-- HERO SECTION -->
-    <section class="hero" id="home">
+
+    <!-- ==========================================
+         HERO SECTION
+    =========================================== -->
+
+    <section
+        class="hero"
+        id="home"
+    >
 
         <div class="hero-content">
 
+
             <p class="small-title">
+
                 MACHINE LEARNING PROJECT
+
             </p>
+
 
             <h1>
-                Used Car
-                <span>Price Prediction</span>
+
+                Used Car Price
+
+                <span>
+                    Prediction
+                </span>
+
             </h1>
 
+
             <p class="hero-text">
+
                 Predict the estimated resale value of a used car
                 using our Machine Learning model.
+
             </p>
 
-            <a href="#predict" class="hero-button">
+
+            <a
+                href="#predict"
+                class="hero-button"
+            >
+
                 Predict Car Price →
+
             </a>
+
 
         </div>
 
     </section>
 
 
-    <!-- PREDICTION SECTION -->
-    <section class="prediction-section" id="predict">
+
+    <!-- ==========================================
+         PREDICTION SECTION
+    =========================================== -->
+
+    <section
+        class="prediction-section"
+        id="predict"
+    >
+
 
         <div class="section-heading">
 
+
             <p>
+
                 PRICE ESTIMATION
+
             </p>
 
+
             <h2>
+
                 Enter Your Car Details
+
             </h2>
 
+
             <span>
+
                 Enter the vehicle details to get an estimated market value.
+
             </span>
+
 
         </div>
 
 
+
+        <!-- ==========================================
+             PREDICTION CARD
+        =========================================== -->
+
         <div class="prediction-card">
 
+
             <form id="predictionForm">
+
 
                 <div class="form-grid">
 
 
-                    <!-- COMPANY / BRAND -->
+
+                    <!-- ==========================================
+                         COMPANY / BRAND
+                    =========================================== -->
+
                     <div class="form-group">
+
 
                         <label for="brand">
+
                             Company / Brand
+
                         </label>
 
-                        <select id="brand" required>
+
+                        <select
+                            id="brand"
+                            required
+                        >
 
                             <option value="">
+
                                 Select Company
+
                             </option>
 
                         </select>
 
+
                     </div>
 
 
-                    <!-- MODEL -->
+
+                    <!-- ==========================================
+                         MODEL
+                    =========================================== -->
+
                     <div class="form-group">
+
 
                         <label for="model">
+
                             Model
+
                         </label>
 
-                        <select id="model" required disabled>
+
+                        <select
+                            id="model"
+                            required
+                            disabled
+                        >
 
                             <option value="">
+
                                 Select Model
+
                             </option>
 
                         </select>
 
+
                     </div>
 
 
-                    <!-- YEAR -->
+
+                    <!-- ==========================================
+                         MANUFACTURING YEAR
+                    =========================================== -->
+
                     <div class="form-group">
 
+
                         <label for="year">
+
                             Manufacturing Year
+
                         </label>
+
 
                         <input
                             type="number"
@@ -136,15 +255,24 @@
                             required
                         >
 
+
                     </div>
 
 
-                    <!-- KM -->
+
+                    <!-- ==========================================
+                         KILOMETERS DRIVEN
+                    =========================================== -->
+
                     <div class="form-group">
 
+
                         <label for="km_driven">
+
                             Kilometers Driven
+
                         </label>
+
 
                         <input
                             type="number"
@@ -154,180 +282,326 @@
                             required
                         >
 
+
                     </div>
 
 
-                    <!-- FUEL -->
+
+                    <!-- ==========================================
+                         FUEL TYPE
+                    =========================================== -->
+
                     <div class="form-group">
+
 
                         <label for="fuel">
+
                             Fuel Type
+
                         </label>
 
-                        <select id="fuel" required>
+
+                        <select
+                            id="fuel"
+                            required
+                        >
 
                             <option value="">
+
                                 Select Fuel
+
                             </option>
+
 
                             <option value="Petrol">
+
                                 Petrol
+
                             </option>
+
 
                             <option value="Diesel">
+
                                 Diesel
+
                             </option>
+
 
                             <option value="CNG">
+
                                 CNG
+
                             </option>
+
 
                             <option value="LPG">
+
                                 LPG
+
                             </option>
+
 
                             <option value="Electric">
+
                                 Electric
+
                             </option>
 
+
                         </select>
+
 
                     </div>
 
 
-                    <!-- SELLER TYPE -->
+
+                    <!-- ==========================================
+                         SELLER TYPE
+                    =========================================== -->
+
                     <div class="form-group">
+
 
                         <label for="seller_type">
+
                             Seller Type
+
                         </label>
 
-                        <select id="seller_type" required>
+
+                        <select
+                            id="seller_type"
+                            required
+                        >
+
 
                             <option value="">
+
                                 Select Seller
+
                             </option>
+
 
                             <option value="Individual">
+
                                 Individual
+
                             </option>
+
 
                             <option value="Dealer">
+
                                 Dealer
+
                             </option>
+
 
                             <option value="Trustmark Dealer">
+
                                 Trustmark Dealer
+
                             </option>
 
+
                         </select>
+
 
                     </div>
 
 
-                    <!-- TRANSMISSION -->
+
+                    <!-- ==========================================
+                         TRANSMISSION
+                    =========================================== -->
+
                     <div class="form-group">
 
+
                         <label for="transmission">
+
                             Transmission
+
                         </label>
 
-                        <select id="transmission" required>
+
+                        <select
+                            id="transmission"
+                            required
+                        >
+
 
                             <option value="">
+
                                 Select Transmission
+
                             </option>
+
 
                             <option value="Manual">
+
                                 Manual
+
                             </option>
 
+
                             <option value="Automatic">
+
                                 Automatic
+
                             </option>
+
 
                         </select>
 
+
                     </div>
+
+
+
+                    <!-- ==========================================
+                         OWNER REMOVED
+                    =========================================== -->
+
+                    <!--
+                        OWNER HAS BEEN REMOVED
+                        FROM THE FRONTEND.
+                    -->
+
 
 
                 </div>
 
 
-                <!-- PREDICT BUTTON -->
+
+                <!-- ==========================================
+                     PREDICT BUTTON
+                =========================================== -->
+
                 <button
                     type="submit"
                     class="predict-button"
                 >
+
                     🔮 Predict Used Car Price
+
                 </button>
+
 
             </form>
 
 
-            <!-- RESULT -->
+
+            <!-- ==========================================
+                 RESULT
+            =========================================== -->
+
             <div
                 id="result"
                 class="result"
                 style="display: none;"
             >
 
+
                 <p>
+
                     ESTIMATED SELLING PRICE
+
                 </p>
 
+
                 <h2 id="price">
+
                     ₹0
+
                 </h2>
 
+
                 <span>
+
                     Based on the provided car details
+
                 </span>
+
 
             </div>
 
+
         </div>
 
+
     </section>
 
 
-    <!-- ABOUT SECTION -->
-    <section class="about" id="about">
+
+    <!-- ==========================================
+         ABOUT SECTION
+    =========================================== -->
+
+    <section
+        class="about"
+        id="about"
+    >
+
 
         <p class="small-title">
+
             ABOUT PROJECT
+
         </p>
+
 
         <h2>
+
             About CARVAL-PREDICTOR
+
         </h2>
 
+
         <p>
-            CARVAL-PREDICTOR is a machine learning based application
-            designed to estimate the resale price of used cars.
-            The system analyzes vehicle details such as brand, model,
-            manufacturing year, kilometers driven, fuel type,
-            seller type and transmission to generate an
-            estimated selling price.
+
+            CARVAL-PREDICTOR is a machine learning based
+            application designed to estimate the resale price
+            of used cars.
+
+            The system analyzes vehicle details such as
+            company, model, manufacturing year,
+            kilometers driven, fuel type, seller type
+            and transmission to generate an estimated
+            selling price.
+
         </p>
+
 
     </section>
 
 
-    <!-- FOOTER -->
+
+    <!-- ==========================================
+         FOOTER
+    =========================================== -->
+
     <footer>
 
+
         <p>
-            © 2026 CARVAL-PREDICTOR | Machine Learning Project
+
+            © 2026 CARVAL-PREDICTOR |
+            Machine Learning Project
+
         </p>
+
 
     </footer>
 
 
-    <!-- JAVASCRIPT -->
+
+    <!-- ==========================================
+         JAVASCRIPT
+    =========================================== -->
+
     <script src="script.js"></script>
+
 
 </body>
 
 </html>
-```
