@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import pandas as pd
 import joblib
-
+import os
 
 # ==========================================
 # CREATE FASTAPI APP
@@ -152,3 +152,35 @@ def predict_price(car: CarDetails):
 
         "currency": "INR"
     }
+    @app.get("/cars")
+def get_cars():
+
+    try:
+
+        # Dataset location
+        dataset_path = os.path.join(
+            os.path.dirname(__file__),
+            "..",
+            "Dataset",
+            "Car Price.csv"
+        )
+
+        # Read dataset
+        df = pd.read_csv(dataset_path)
+
+        # Keep only required columns
+        cars = df[["Brand", "Model"]].dropna()
+
+        # Remove duplicate combinations
+        cars = cars.drop_duplicates()
+
+        # Convert to JSON format
+        result = cars.to_dict(orient="records")
+
+        return result
+
+    except Exception as e:
+
+        return {
+            "error": str(e)
+        }

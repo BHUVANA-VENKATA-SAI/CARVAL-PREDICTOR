@@ -20,6 +20,14 @@ const priceElement = document.getElementById("price");
 
 
 // ==========================================
+// BACKEND API URL
+// ==========================================
+
+const API_URL =
+    "https://carval-predictor.onrender.com";
+
+
+// ==========================================
 // CAR DATA
 // ==========================================
 
@@ -27,317 +35,105 @@ let carData = [];
 
 
 // ==========================================
-// LOAD CAR DATA FROM CSV
+// LOAD COMPANY + MODEL DATA
+// FROM FASTAPI BACKEND
 // ==========================================
 
 async function loadCarData() {
 
     try {
 
-        console.log("Loading car dataset...");
-
-
-        // IMPORTANT:
-        // Dataset is outside Frontend folder
-        const response = await fetch(
-            "../Dataset/Car Price.csv"
+        console.log(
+            "Loading car data from backend..."
         );
 
+
+        // --------------------------------------
+        // CALL /cars API
+        // --------------------------------------
+
+        const response = await fetch(
+            `${API_URL}/cars`
+        );
+
+
+        // --------------------------------------
+        // CHECK RESPONSE
+        // --------------------------------------
 
         if (!response.ok) {
 
             throw new Error(
-                "Unable to load Car Price.csv"
+                `Server returned ${response.status}`
             );
 
         }
 
 
-        const csvText = await response.text();
+        // --------------------------------------
+        // CONVERT RESPONSE TO JSON
+        // --------------------------------------
+
+        const data = await response.json();
 
 
-        console.log(
-            "CSV loaded successfully."
-        );
+        // --------------------------------------
+        // CHECK API ERROR
+        // --------------------------------------
 
-
-        // ==========================================
-        // SPLIT CSV INTO LINES
-        // ==========================================
-
-        const lines = csvText
-            .trim()
-            .split(/\r?\n/);
-
-
-        if (lines.length < 2) {
+        if (data.error) {
 
             throw new Error(
-                "CSV file is empty."
+                data.error
             );
 
         }
 
 
-        // ==========================================
-        // CSV LINE PARSER
-        // Handles commas inside quotes
-        // ==========================================
-
-        function parseCSVLine(line) {
-
-            const result = [];
-
-            let current = "";
-
-            let insideQuotes = false;
-
-
-            for (
-                let i = 0;
-                i < line.length;
-                i++
-            ) {
-
-                const character = line[i];
-
-
-                // ----------------------------------
-                // QUOTES
-                // ----------------------------------
-
-                if (character === '"') {
-
-                    // Handle double quotes
-                    if (
-                        insideQuotes &&
-                        line[i + 1] === '"'
-                    ) {
-
-                        current += '"';
-
-                        i++;
-
-                    }
-
-                    else {
-
-                        insideQuotes =
-                            !insideQuotes;
-
-                    }
-
-                }
-
-
-                // ----------------------------------
-                // COMMA
-                // ----------------------------------
-
-                else if (
-                    character === "," &&
-                    !insideQuotes
-                ) {
-
-                    result.push(
-                        current.trim()
-                    );
-
-                    current = "";
-
-                }
-
-
-                // ----------------------------------
-                // NORMAL CHARACTER
-                // ----------------------------------
-
-                else {
-
-                    current += character;
-
-                }
-
-            }
-
-
-            // Add last value
-            result.push(
-                current.trim()
-            );
-
-
-            return result;
-
-        }
-
-
-        // ==========================================
-        // GET CSV HEADERS
-        // ==========================================
-
-        const headers =
-            parseCSVLine(lines[0]);
-
-
-        console.log(
-            "CSV Headers:",
-            headers
-        );
-
-
-        // Find Brand column
-        const brandIndex =
-            headers.indexOf("Brand");
-
-
-        // Find Model column
-        const modelIndex =
-            headers.indexOf("Model");
-
-
-        // ==========================================
-        // CHECK REQUIRED COLUMNS
-        // ==========================================
-
-        if (
-            brandIndex === -1 ||
-            modelIndex === -1
-        ) {
-
-            throw new Error(
-                "Brand or Model column was not found in CSV."
-            );
-
-        }
-
-
-        console.log(
-            "Brand column index:",
-            brandIndex
-        );
-
-
-        console.log(
-            "Model column index:",
-            modelIndex
-        );
-
-
-        // ==========================================
-        // READ ALL CAR ROWS
-        // ==========================================
-
-        for (
-            let i = 1;
-            i < lines.length;
-            i++
-        ) {
-
-            // Skip empty lines
-            if (!lines[i].trim()) {
-
-                continue;
-
-            }
-
-
-            const row =
-                parseCSVLine(lines[i]);
-
-
-            const brand =
-                row[brandIndex];
-
-
-            const model =
-                row[modelIndex];
-
-
-            // Only add valid records
-            if (
-                brand &&
-                model
-            ) {
-
-                carData.push({
-
-                    brand:
-                        brand.trim(),
-
-                    model:
-                        model.trim()
-
-                });
-
-            }
-
-        }
-
-
-        console.log(
-            "Total car records:",
-            carData.length
-        );
-
-
-        // ==========================================
-        // REMOVE DUPLICATE BRAND + MODEL
-        // ==========================================
-
-        const uniqueCars = [];
-
-        const seen = new Set();
-
-
-        carData.forEach(
+        // --------------------------------------
+        // STORE CAR DATA
+        // --------------------------------------
+
+        carData = data.map(
             function (car) {
 
-                const key =
-                    car.brand +
-                    "|||" +
-                    car.model;
+                return {
 
+                    brand: car.Brand,
 
-                if (!seen.has(key)) {
+                    model: car.Model
 
-                    seen.add(key);
-
-                    uniqueCars.push(car);
-
-                }
+                };
 
             }
         );
 
 
-        carData =
-            uniqueCars;
-
-
         console.log(
-            "Unique car combinations:",
+            "Total car combinations:",
             carData.length
         );
 
 
-        // ==========================================
+        // ======================================
         // GET UNIQUE COMPANIES
-        // ==========================================
+        // ======================================
 
         const brands = [
+
             ...new Set(
+
                 carData.map(
                     function (car) {
+
                         return car.brand;
+
                     }
                 )
+
             )
-        ];
 
-
-        // Sort alphabetically
-        brands.sort();
+        ].sort();
 
 
         console.log(
@@ -346,9 +142,17 @@ async function loadCarData() {
         );
 
 
-        // ==========================================
-        // ADD COMPANIES TO DROPDOWN
-        // ==========================================
+        // ======================================
+        // CLEAR COMPANY DROPDOWN
+        // ======================================
+
+        brandSelect.innerHTML =
+            '<option value="">Select Company</option>';
+
+
+        // ======================================
+        // ADD COMPANIES
+        // ======================================
 
         brands.forEach(
             function (brand) {
@@ -376,7 +180,7 @@ async function loadCarData() {
 
 
         console.log(
-            "Company dropdown populated."
+            "Company dropdown loaded successfully."
         );
 
     }
@@ -385,15 +189,14 @@ async function loadCarData() {
     catch (error) {
 
         console.error(
-            "CSV Loading Error:",
+            "Car dataset loading error:",
             error
         );
 
 
         alert(
             "Unable to load car dataset.\n\n" +
-            "Make sure you are running Frontend/index.html " +
-            "using Live Server."
+            "Please try again after the backend finishes loading."
         );
 
     }
@@ -410,6 +213,10 @@ brandSelect.addEventListener(
     function () {
 
 
+        // --------------------------------------
+        // GET SELECTED COMPANY
+        // --------------------------------------
+
         const selectedBrand =
             brandSelect.value;
 
@@ -420,17 +227,17 @@ brandSelect.addEventListener(
         );
 
 
-        // ==========================================
+        // --------------------------------------
         // RESET MODEL DROPDOWN
-        // ==========================================
+        // --------------------------------------
 
         modelSelect.innerHTML =
             '<option value="">Select Model</option>';
 
 
-        // ==========================================
-        // NO COMPANY SELECTED
-        // ==========================================
+        // --------------------------------------
+        // DISABLE MODEL IF NO COMPANY
+        // --------------------------------------
 
         if (!selectedBrand) {
 
@@ -442,9 +249,9 @@ brandSelect.addEventListener(
         }
 
 
-        // ==========================================
-        // FIND MODELS FOR SELECTED COMPANY
-        // ==========================================
+        // ======================================
+        // FIND MODELS FOR COMPANY
+        // ======================================
 
         const models = [
 
@@ -473,11 +280,7 @@ brandSelect.addEventListener(
 
             )
 
-        ];
-
-
-        // Sort models
-        models.sort();
+        ].sort();
 
 
         console.log(
@@ -486,9 +289,9 @@ brandSelect.addEventListener(
         );
 
 
-        // ==========================================
-        // ADD MODELS TO DROPDOWN
-        // ==========================================
+        // ======================================
+        // ADD MODELS
+        // ======================================
 
         models.forEach(
             function (model) {
@@ -515,17 +318,12 @@ brandSelect.addEventListener(
         );
 
 
-        // ==========================================
+        // ======================================
         // ENABLE MODEL DROPDOWN
-        // ==========================================
+        // ======================================
 
         modelSelect.disabled =
             false;
-
-
-        console.log(
-            "Model dropdown populated."
-        );
 
     }
 );
@@ -547,24 +345,29 @@ form.addEventListener(
     async function (event) {
 
 
-        // Stop page refresh
+        // --------------------------------------
+        // PREVENT PAGE REFRESH
+        // --------------------------------------
+
         event.preventDefault();
 
 
-        // ==========================================
+        // ======================================
         // GET FORM VALUES
-        // ==========================================
+        // ======================================
 
         const brand =
             document
                 .getElementById("brand")
-                .value;
+                .value
+                .trim();
 
 
         const model =
             document
                 .getElementById("model")
-                .value;
+                .value
+                .trim();
 
 
         const year =
@@ -601,18 +404,26 @@ form.addEventListener(
                 .value;
 
 
-        // ==========================================
-        // VALIDATION
-        // ==========================================
+        // ======================================
+        // VALIDATE INPUT
+        // ======================================
 
         if (
+
             !brand ||
+
             !model ||
+
             !year ||
+
             !kmDriven ||
+
             !fuel ||
+
             !sellerType ||
+
             !transmission
+
         ) {
 
             alert(
@@ -624,9 +435,9 @@ form.addEventListener(
         }
 
 
-        // ==========================================
-        // SHOW RESULT BOX
-        // ==========================================
+        // ======================================
+        // SHOW RESULT
+        // ======================================
 
         resultBox.style.display =
             "block";
@@ -636,9 +447,17 @@ form.addEventListener(
             "Predicting...";
 
 
-        // ==========================================
-        // PREPARE DATA FOR FASTAPI
-        // ==========================================
+        // ======================================
+        // PREPARE DATA
+        // ======================================
+        //
+        // Owner is removed from the frontend.
+        //
+        // Your existing trained model still expects
+        // Owner, so we provide "First Owner"
+        // internally.
+        //
+        // ======================================
 
         const carDataToSend = {
 
@@ -663,19 +482,6 @@ form.addEventListener(
             Transmission:
                 transmission,
 
-
-            // --------------------------------------
-            // IMPORTANT
-            // --------------------------------------
-            // Your CURRENT trained model/backend
-            // still expects Owner.
-            //
-            // Owner is NOT displayed in frontend.
-            //
-            // We are sending First Owner internally
-            // only to keep your existing model working.
-            // --------------------------------------
-
             Owner:
                 "First Owner"
 
@@ -683,25 +489,24 @@ form.addEventListener(
 
 
         console.log(
-            "Data sent to API:",
+            "Sending prediction data:",
             carDataToSend
         );
 
 
-        // ==========================================
-        // SEND REQUEST TO FASTAPI
-        // ==========================================
+        // ======================================
+        // SEND DATA TO FASTAPI
+        // ======================================
 
         try {
 
             const response =
                 await fetch(
-                    "https://carval-predictor.onrender.com/predict",
+                    `${API_URL}/predict`,
                     {
 
                         method:
                             "POST",
-
 
                         headers: {
 
@@ -709,7 +514,6 @@ form.addEventListener(
                                 "application/json"
 
                         },
-
 
                         body:
                             JSON.stringify(
@@ -720,9 +524,9 @@ form.addEventListener(
                 );
 
 
-            // ==========================================
+            // ==================================
             // CHECK RESPONSE
-            // ==========================================
+            // ==================================
 
             if (!response.ok) {
 
@@ -731,21 +535,21 @@ form.addEventListener(
 
 
                 console.error(
-                    "API Error:",
+                    "Prediction server error:",
                     errorText
                 );
 
 
                 throw new Error(
-                    "Prediction request failed."
+                    `Prediction failed (${response.status})`
                 );
 
             }
 
 
-            // ==========================================
-            // GET RESPONSE
-            // ==========================================
+            // ==================================
+            // GET JSON RESPONSE
+            // ==================================
 
             const data =
                 await response.json();
@@ -757,9 +561,22 @@ form.addEventListener(
             );
 
 
-            // ==========================================
-            // FORMAT PRICE
-            // ==========================================
+            // ==================================
+            // CHECK API ERROR
+            // ==================================
+
+            if (data.error) {
+
+                throw new Error(
+                    data.error
+                );
+
+            }
+
+
+            // ==================================
+            // FORMAT PRICE IN INDIAN RUPEES
+            // ==================================
 
             const formattedPrice =
                 new Intl.NumberFormat(
@@ -781,12 +598,13 @@ form.addEventListener(
                 );
 
 
-            // ==========================================
-            // DISPLAY PRICE
-            // ==========================================
+            // ==================================
+            // DISPLAY PREDICTED PRICE
+            // ==================================
 
             priceElement.innerText =
                 formattedPrice;
+
 
         }
 
@@ -794,7 +612,7 @@ form.addEventListener(
         catch (error) {
 
             console.error(
-                "Prediction Error:",
+                "Prediction error:",
                 error
             );
 
@@ -805,7 +623,7 @@ form.addEventListener(
 
             alert(
                 "Unable to connect to the prediction server.\n\n" +
-                "Please try again."
+                error.message
             );
 
         }
